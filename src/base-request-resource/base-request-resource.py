@@ -96,4 +96,10 @@ def load(url):
 
 if __name__ == "__main__":
     import sys
-    load(URL(sys.argv[1]))
+
+    # url이 없다면, 기본 파일을 적용한다
+    if len(sys.argv) < 2:
+        default_url = "file:///Users/junhokim/develops/self-browser/src/base-request-resource/hello.txt"
+        load(URL(default_url))
+    else:
+        load(URL(sys.argv[1]))
