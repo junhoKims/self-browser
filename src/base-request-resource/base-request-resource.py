@@ -1,15 +1,13 @@
 import socket
 import ssl
 
-
-
 class URL:
     # URL 클래스의 생성자
     # url을 인자로 받아서 이를 분리해 scheme, host, path 셋업
     def __init__(self, url):
         # scheme 인자 추출
         self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https"]
+        assert self.scheme in ["http", "https", "file"]
 
         # url에서 host와 path 추출
         if "/" not in url: url = url + "/"
@@ -24,6 +22,9 @@ class URL:
     # URL을 가지고 리소스를 요청하는 함수
     # socket을 통해 웹서버에 연결하고 인자를 통해 리소스 호출
     def request(self):
+        if self.scheme == "file":
+            with open(self.path, "r", encoding="utf8") as f:
+                return f.read()
         # socket을 생성하고 host와 연결한다
         # 다른 컴퓨터을 어떻게 찾을지(family), 어떻게 데이터를 전달할지(type), 패킷 전송 방법(proto) 등을 설정
         s = socket.socket(
@@ -42,8 +43,9 @@ class URL:
 
         # 인스턴스에 기록한 host, path를 통해서 리소스 요청 문자열을 작성
         # 반드시 엔터 두번(\r\n) 작성 필요
-        request = "GET {} HTTP/1.0\r\n".format(self.path)
+        request = "GET {} HTTP/1.1\r\n".format(self.path)
         request += "Host: {}\r\n".format(self.host)
+        request += "Connection: close\r\n"
         request += "\r\n"
         s.send(request.encode("utf8"))
 
